@@ -1,3 +1,4 @@
+require_relative '../item'
 require_relative '../label'
 
 describe Label do
@@ -11,6 +12,6 @@ describe Label do
 
   it 'should set self as the label of the item' do
     label.add_item(item)
-    expect(item.label).to eq(label)
+    expect(item.labels).to include(label)
   end
 end

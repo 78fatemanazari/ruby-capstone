@@ -1,4 +1,4 @@
-# book.rb
+require_relative 'item'
 
 class Book < Item
   attr_reader :title, :author, :cover_state, :publisher

@@ -34,7 +34,7 @@ class Item
     @authors << author
   end
 
-  def add_label(label)
+  def label=(label)
     @labels << label
   end
 
