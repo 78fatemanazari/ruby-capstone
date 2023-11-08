@@ -59,18 +59,24 @@ end
 def handle_option_five(books, labels)
   book_params = book_params(books)
   book = create_and_add_book(books, book_params)
-  puts "Book added: #{book.title} by #{book.author}"
 
   print 'Add a label for this book (y/n)? '
   add_label_option = gets.chomp.downcase
-  return unless add_label_option == 'y'
 
-  print 'Enter label title: '
-  label_title = gets.chomp
-  label = Label.new(title: label_title, color: 'YourColorHere')
-  labels << label
-  book.add_label(label)
-  puts "Label added: #{label.title}"
+  if add_label_option == 'y'
+    print 'Enter label title: '
+    label_title = gets.chomp
+
+    print 'Enter label color: '
+    label_color = gets.chomp
+
+    label = Label.new(generate_unique_id(labels), label_title, label_color)
+    label.add_item(book)
+
+    puts "Label '#{label.title}' added to '#{book.title}'."
+  end
+
+  puts "Book added: #{book.title} by #{book.author}"
 end
 
 def book_params(books)
@@ -144,9 +150,8 @@ loop do
   when 4
     handle_option_four(labels)
   when 5
-    handle_option_five(books)
+    handle_option_five(books, labels)
   when 6
-    # Save data to JSON files before quitting
     save_data_to_json(books, BOOKS_JSON_FILE)
     save_data_to_json(labels, LABELS_JSON_FILE)
     puts 'Data saved. Goodbye!'
