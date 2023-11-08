@@ -73,11 +73,15 @@ def handle_option_five(books, labels)
     label = Label.new(generate_unique_id(labels), label_title, label_color)
     label.add_item(book)
 
+    # Add the newly created label to the labels collection
+    labels << label
+
     puts "Label '#{label.title}' added to '#{book.title}'."
   end
 
   puts "Book added: #{book.title} by #{book.author}"
 end
+
 
 def book_params(books)
   print 'Enter book title: '
