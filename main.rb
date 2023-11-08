@@ -1,3 +1,4 @@
+require 'json'
 require_relative 'item'
 require_relative 'book'
 require_relative 'label'
@@ -116,6 +117,23 @@ end
 books = []
 labels = []
 
+def save_data_to_json(filename, data)
+  File.open(filename, 'w') do |file|
+    JSON.dump(data, file)
+  end
+end
+
+def load_data_from_json(filename)
+  if File.exist?(filename)
+    JSON.parse(File.read(filename))
+  else
+    []
+  end
+end
+
+books = load_data_from_json('books.json', Book)
+labels = load_data_from_json('labels.json', Label)
+
 loop do
   display_menu
   print 'Please select an option: '
@@ -133,6 +151,9 @@ loop do
   when 5
     handle_option_five(books, labels)
   when 6
+    # Save data to JSON files before quitting
+    save_data_to_json('books.json', books)
+    save_data_to_json('labels.json', labels)
     puts 'Data saved. Goodbye!'
     break
   else
