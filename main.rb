@@ -119,7 +119,8 @@ labels = []
 
 def save_data_to_json(filename, data)
   File.open(filename, 'w') do |file|
-    JSON.dump(data, file)
+    json_data = data.map(&:to_json)
+    JSON.dump(json_data, file)
   end
 end
 
