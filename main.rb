@@ -131,8 +131,8 @@ def load_data_from_json(filename)
   end
 end
 
-books = load_data_from_json('books.json', Book)
-labels = load_data_from_json('labels.json', Label)
+books = load_data_from_json('books.json')
+labels = load_data_from_json('labels.json')
 
 loop do
   display_menu
@@ -151,7 +151,6 @@ loop do
   when 5
     handle_option_five(books, labels)
   when 6
-    # Save data to JSON files before quitting
     save_data_to_json('books.json', books)
     save_data_to_json('labels.json', labels)
     puts 'Data saved. Goodbye!'
