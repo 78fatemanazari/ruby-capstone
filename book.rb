@@ -20,4 +20,15 @@ class Book < Item
   def assign_label(label)
     @label = label
   end
+
+  def to_json(*_args)
+    {
+      id: id,
+      publish_date: publish_date,
+      title: title,
+      author: author,
+      cover_state: cover_state,
+      publisher: publisher
+    }.to_json
+  end
 end
