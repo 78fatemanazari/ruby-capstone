@@ -124,9 +124,11 @@ def save_data_to_json(filename, data)
   end
 end
 
-def load_data_from_json(filename)
+def load_data_from_json(filename, data_class)
   if File.exist?(filename)
-    JSON.parse(File.read(filename))
+    JSON.parse(File.read(filename)).map do |json|
+      data_class.from_json(json)
+    end
   else
     []
   end
