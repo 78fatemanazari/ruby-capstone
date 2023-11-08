@@ -31,4 +31,9 @@ class Book < Item
       publisher: publisher
     }.to_json
   end
+
+  def self.from_json(json)
+    data = JSON.parse(json)
+    new(data)
+  end
 end
