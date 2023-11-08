@@ -1,4 +1,3 @@
-require 'json'
 require_relative 'item'
 require_relative 'book'
 require_relative 'label'
@@ -117,24 +116,6 @@ end
 books = []
 labels = []
 
-BOOKS_JSON_FILE = 'books.json'.freeze
-LABELS_JSON_FILE = 'labels.json'.freeze
-
-def load_data_from_json(file_path)
-  if File.exist?(file_path)
-    JSON.parse(File.read(file_path), symbolize_names: true)
-  else
-    []
-  end
-end
-
-def save_data_to_json(data, file_path)
-  File.write(file_path, JSON.pretty_generate(data))
-end
-
-books = load_data_from_json(BOOKS_JSON_FILE)
-labels = load_data_from_json(LABELS_JSON_FILE)
-
 loop do
   display_menu
   print 'Please select an option: '
@@ -152,8 +133,6 @@ loop do
   when 5
     handle_option_five(books, labels)
   when 6
-    save_data_to_json(books, BOOKS_JSON_FILE)
-    save_data_to_json(labels, LABELS_JSON_FILE)
     puts 'Data saved. Goodbye!'
     break
   else

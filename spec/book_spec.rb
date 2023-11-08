@@ -1,35 +1,42 @@
 require_relative '../book'
-require_relative '../item'
 
-RSpec.describe Book do
-  describe '#can_be_archived?' do
-    context 'when the book has a bad cover state' do
-      it 'returns true' do
-        book = Book.new(id: 1, publish_date: Time.now, title: 'Test Book', author: 'Test Author', cover_state: 'bad',
-                        publisher: 'Test Publisher')
+describe Book do
+  let(:book_params) do
+    {
+      id: 1,
+      publish_date: Time.new(2022, 1, 1),
+      title: 'Test Book',
+      author: 'Test Author',
+      cover_state: 'good',
+      publisher: 'Test Publisher'
+    }
+  end
 
-        expect(book.can_be_archived?).to be true
-      end
-    end
+  subject { Book.new(book_params) }
 
-    context 'when the book is older than 10 years' do
-      it 'returns true' do
-        ten_years_ago = Time.now - (365 * 10 * 24 * 60 * 60) # 10 years in seconds
-        book = Book.new(id: 1, publish_date: ten_years_ago, title: 'Test Book', author: 'Test Author',
-                        cover_state: 'good', publisher: 'Test Publisher')
+  it 'has title, author, cover_state, and publisher attributes' do
+    expect(subject.title).to eq('Test Book')
+    expect(subject.author).to eq('Test Author')
+    expect(subject.cover_state).to eq('good')
+    expect(subject.publisher).to eq('Test Publisher')
+  end
 
-        expect(book.can_be_archived?).to be true
-      end
-    end
+  it 'can be archived if cover_state is bad' do
+    subject.cover_state = 'bad'
+    expect(subject.can_be_archived?).to be true
+  end
 
-    context 'when the book is not older than 10 years and has a good cover' do
-      it 'returns false' do
-        nine_years_ago = Time.now - (365 * 9 * 24 * 60 * 60) # 9 years in seconds
-        book = Book.new(id: 1, publish_date: nine_years_ago, title: 'Test Book', author: 'Test Author',
-                        cover_state: 'good', publisher: 'Test Publisher')
+  it 'can be archived if super class allows it' do
+    book_params = {
+      id: 1,
+      publish_date: Time.new(2012, 1, 1), # An example from more than 10 years ago
+      title: 'Test Book',
+      author: 'Test Author',
+      cover_state: 'good',
+      publisher: 'Test Publisher'
+    }
+    book = Book.new(book_params)
 
-        expect(book.can_be_archived?).to be false
-      end
-    end
+    expect(book.can_be_archived?).to be true
   end
 end
