@@ -14,20 +14,22 @@ class Label
     item.label = self
   end
 
+  # Serialize the label to JSON
   def to_json(*_args)
     {
-      id: id,
-      title: title,
-      color: color,
-      items: items.map(&:id)
+      id: @id,
+      title: @title,
+      color: @color,
+      items: @items.map(&:id)
     }.to_json
   end
 
-  def self.from_json(json)
+  # Deserialize the label from JSON
+  def self.from_json(json, items)
     data = JSON.parse(json)
     label = new(data['id'], data['title'], data['color'])
     data['items'].each do |item_id|
-      # Find the associated item from your collection and add it to the label
+      # Find the associated item from the items collection and add it to the label
       item = items.find { |i| i.id == item_id }
       label.add_item(item) if item
     end
