@@ -45,7 +45,7 @@ end
 def handle_option_three(books)
   puts 'List of all books:'
   books.each do |book|
-    puts "#{book.title} by #{book.author}"
+    puts "#{book.title} by #{book.author} (Publisher: #{book.publisher}, Cover State: #{book.cover_state})"
   end
 end
 
