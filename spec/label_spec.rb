@@ -1,17 +1,22 @@
-require_relative '../item'
 require_relative '../label'
 
 describe Label do
-  let(:label) { Label.new(1, 'Sample Label', 'Blue') }
-  let(:item) { Item.new(1, Time.new(2020, 1, 1)) }
+  let(:label) { Label.new(1, 'Test Label', 'red') }
 
-  it 'should add an item to the collection of items' do
-    label.add_item(item)
-    expect(label.items).to include(item)
+  it 'has id, title, and color attributes' do
+    expect(label.id).to eq(1)
+    expect(label.title).to eq('Test Label')
+    expect(label.color).to eq('red')
   end
 
-  it 'should set self as the label of the item' do
-    label.add_item(item)
-    expect(item.labels).to include(label)
+  it 'can add items' do
+    book = Book.new({ id: 2, publish_date: Time.new(2022, 1, 1),
+                      title: 'Test Book',
+                      author: 'Test Author',
+                      cover_state: 'good',
+                      publisher: 'Test Publisher' })
+    label.add_item(book)
+    expect(label.items).to include(book)
+    expect(book.label).to eq(label)
   end
 end

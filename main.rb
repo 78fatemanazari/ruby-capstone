@@ -45,7 +45,7 @@ end
 def handle_option_three(books)
   puts 'List of all books:'
   books.each do |book|
-    puts "#{book.title} by #{book.author}"
+    puts "#{book.title} by #{book.author} (Publisher: #{book.publisher}, Cover State: #{book.cover_state})"
   end
 end
 
@@ -59,18 +59,27 @@ end
 def handle_option_five(books, labels)
   book_params = book_params(books)
   book = create_and_add_book(books, book_params)
-  puts "Book added: #{book.title} by #{book.author}"
 
   print 'Add a label for this book (y/n)? '
   add_label_option = gets.chomp.downcase
-  return unless add_label_option == 'y'
 
-  print 'Enter label title: '
-  label_title = gets.chomp
-  label = Label.new(title: label_title, color: 'YourColorHere')
-  labels << label
-  book.add_label(label)
-  puts "Label added: #{label.title}"
+  if add_label_option == 'y'
+    print 'Enter label title: '
+    label_title = gets.chomp
+
+    print 'Enter label color: '
+    label_color = gets.chomp
+
+    label = Label.new(generate_unique_id(labels), label_title, label_color)
+    label.add_item(book)
+
+    # Add the newly created label to the labels collection
+    labels << label
+
+    puts "Label '#{label.title}' added to '#{book.title}'."
+  end
+
+  puts "Book added: #{book.title} by #{book.author}"
 end
 
 def book_params(books)
@@ -111,23 +120,28 @@ end
 books = []
 labels = []
 
-BOOKS_JSON_FILE = 'books.json'.freeze
-LABELS_JSON_FILE = 'labels.json'.freeze
+def save_data_to_json(filename, data)
+  File.open(filename, 'w') do |file|
+    json_data = data.map(&:to_json)
+    JSON.dump(json_data, file)
+  end
+end
 
-def load_data_from_json(file_path)
-  if File.exist?(file_path)
-    JSON.parse(File.read(file_path), symbolize_names: true)
+def load_data_from_json(filename, data_class)
+  if File.exist?(filename)
+    JSON.parse(File.read(filename)).map { |json| data_class.from_json(json) }
   else
     []
   end
 end
 
-def save_data_to_json(data, file_path)
-  File.write(file_path, JSON.pretty_generate(data))
-end
+labels = load_data_from_json('labels.json', Label)
+books = load_data_from_json('books.json', Book)
 
-books = load_data_from_json(BOOKS_JSON_FILE)
-labels = load_data_from_json(LABELS_JSON_FILE)
+# Link labels with items
+labels.each do |label|
+  label.items = books.select { |book| book.label == label }
+end
 
 loop do
   display_menu
@@ -144,11 +158,10 @@ loop do
   when 4
     handle_option_four(labels)
   when 5
-    handle_option_five(books)
+    handle_option_five(books, labels)
   when 6
-    # Save data to JSON files before quitting
-    save_data_to_json(books, BOOKS_JSON_FILE)
-    save_data_to_json(labels, LABELS_JSON_FILE)
+    save_data_to_json('books.json', books)
+    save_data_to_json('labels.json', labels)
     puts 'Data saved. Goodbye!'
     break
   else
