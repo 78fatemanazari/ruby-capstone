@@ -135,7 +135,6 @@ def load_data_from_json(filename, data_class)
   end
 end
 
-
 labels = load_data_from_json('labels.json', Label)
 books = load_data_from_json('books.json', Book)
 
