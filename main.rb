@@ -2,6 +2,7 @@ require 'json'
 require_relative 'item'
 require_relative 'book'
 require_relative 'label'
+require_relative 'music_album'
 
 def display_menu
   puts 'Menu Options:'
@@ -73,6 +74,41 @@ def handle_option_five(books, labels)
   puts "Label added: #{label.title}"
 end
 
+def handle_option_six(music_albums)
+  puts 'List of all music albums:'
+  music_albums.each do |album|
+    puts "#{album.title} - #{album.on_spotify ? 'On Spotify' : 'Not on Spotify'}"
+  end
+end
+
+def handle_option_seven(music_albums)
+  album_params = album_params(music_albums)
+  album = create_and_add_music_album(music_albums, album_params)
+  puts "Music album added: #{album.title} - #{album.on_spotify ? 'On Spotify' : 'Not on Spotify'}"
+end
+
+def album_params(music_albums)
+  print 'Enter album title: '
+  title = gets.chomp
+  print 'Enter release year: '
+  release_year = gets.chomp.to_i
+  print 'On Spotify? (y/n): '
+  on_spotify_option = gets.chomp.downcase
+
+  {
+    id: generate_unique_id(music_albums),
+    publish_date: Time.new(release_year, 1, 1),
+    title: title,
+    on_spotify: on_spotify_option == 'y'
+  }
+end
+
+def create_and_add_music_album(music_albums, params)
+  album = MusicAlbum.new(params)
+  music_albums << album
+  album
+end
+
 def book_params(books)
   print 'Enter book title: '
   title = gets.chomp
@@ -113,6 +149,7 @@ labels = []
 
 BOOKS_JSON_FILE = 'books.json'.freeze
 LABELS_JSON_FILE = 'labels.json'.freeze
+MUSIC_ALBUMS_JSON_FILE = 'music_albums.json'.freeze
 
 def load_data_from_json(file_path)
   if File.exist?(file_path)
@@ -128,6 +165,7 @@ end
 
 books = load_data_from_json(BOOKS_JSON_FILE)
 labels = load_data_from_json(LABELS_JSON_FILE)
+music_albums = load_data_from_json(MUSIC_ALBUMS_JSON_FILE)
 
 loop do
   display_menu
@@ -146,9 +184,14 @@ loop do
   when 5
     handle_option_five(books)
   when 6
+    handle_option_six(music_albums)
+  when 7
+    handle_option_seven(music_albums)
+  when 8
     # Save data to JSON files before quitting
     save_data_to_json(books, BOOKS_JSON_FILE)
     save_data_to_json(labels, LABELS_JSON_FILE)
+    save_data_to_json(music_albums, MUSIC_ALBUMS_JSON_FILE)
     puts 'Data saved. Goodbye!'
     break
   else
