@@ -3,7 +3,6 @@ require_relative 'item'
 require_relative 'game'
 require_relative 'author'
 require 'date'
-require 'json'
 require_relative 'book'
 require_relative 'label'
 
