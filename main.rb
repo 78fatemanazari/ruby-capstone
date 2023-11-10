@@ -75,7 +75,8 @@ end
 
 def book_params(books)
   print 'Enter book title: '
-  title = gets.chomp
+  title = gets
+    .chomp
   print 'Enter author: '
   author = gets.chomp
   print 'Enter cover state (good/bad): '

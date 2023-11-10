@@ -48,11 +48,11 @@ class Library
   end
 
   def save_data_to_json
-    File.open('games.json', 'w') do |file|
+    File.open('json/games.json', 'w') do |file|
       file.puts JSON.generate(@games.map(&:to_hash))
     end
 
-    File.open('authors.json', 'w') do |file|
+    File.open('json/authors.json', 'w') do |file|
       file.puts JSON.generate(@authors.map(&:to_hash))
     end
   end

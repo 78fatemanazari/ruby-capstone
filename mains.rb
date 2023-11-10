@@ -20,7 +20,7 @@ loop do
   when 2
     library.list_all('authors')
   when 3
-    library.add('game')
+    library.add_game('game')
   when 4
     library.save_data_to_json # Save data to JSON files before quitting
     puts 'Exiting the program. Goodbye!'

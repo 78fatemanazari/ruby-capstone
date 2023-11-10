@@ -34,7 +34,7 @@ class Library
     print 'Publish Date (YYYY-MM-DD): '
     publish_date = Date.parse(gets.chomp)
 
-    new_game = Game.new(title, multiplayer, last_played_at, publish_date)
+    new_game = Game.new(title: title, multiplayer:multiplayer, last_played_at:last_played_at, publish_date)
     @games << new_game
 
     puts "Game '#{new_game.title}' added successfully!"
