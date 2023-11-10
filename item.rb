@@ -41,4 +41,22 @@ class Item
   def add_source(source)
     @sources << source
   end
+
+  def title
+    # Implement logic to retrieve or generate a title for the item
+    # For example, you can return a default title or use other attributes to generate it.
+    'Default Title'
+  end
+
+  def to_h
+    {
+      id: @id,
+      publish_date: @publish_date,
+      archived: @archived,
+      genres: @genres,
+      authors: @authors,
+      labels: @labels,
+      sources: @sources
+    }
+  end
 end
