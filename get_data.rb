@@ -1,6 +1,5 @@
 require 'json'
 
-
 def loadgame
   games = []
   return games if File.empty?('json/game.json')

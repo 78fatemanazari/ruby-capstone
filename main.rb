@@ -8,12 +8,9 @@ def display_menu
   puts '1. Check if an item can be archived'
   puts '2. Move an item to the archive'
   puts '3. List all books'
-  puts '4. List all games'
-  puts '5. List all labels'
-  puts '6. List all authors'
-  puts '6. Add a game'
-  puts '7. Add a book'
-  puts '8. Quit'
+  puts '4. List all labels'
+  puts '5. Add a book'
+  puts '6. Quit'
 end
 
 def handle_option_one
