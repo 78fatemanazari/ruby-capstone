@@ -11,7 +11,9 @@ def display_menu
   puts '3. List all books'
   puts '4. List all labels'
   puts '5. Add a book'
-  puts '6. Quit'
+  puts '6. List all music albums' # Added this line
+  puts '7. Add a music album' # Added this line
+  puts '8. Quit'
 end
 
 def handle_option_one
@@ -104,7 +106,12 @@ def album_params(music_albums)
 end
 
 def create_and_add_music_album(music_albums, params)
-  album = MusicAlbum.new(params)
+  album = MusicAlbum.new(
+    params[:id],
+    params[:publish_date],
+    params[:title], # Add this line
+    params[:on_spotify]
+  )
   music_albums << album
   album
 end
