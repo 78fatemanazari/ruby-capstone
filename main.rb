@@ -3,7 +3,7 @@ require_relative 'item'
 require_relative 'book'
 require_relative 'label'
 require_relative 'music_album'
-
+require_relative 'genre'
 def display_menu
   puts 'Menu Options:'
   puts '1. Check if an item can be archived'
@@ -83,7 +83,7 @@ def handle_option_six(music_albums)
     if album.is_a?(MusicAlbum)
       puts "#{album.title} - #{album.on_spotify ? 'On Spotify' : 'Not on Spotify'}"
     else
-      puts "#{album} is not a valid MusicAlbum object."
+      puts "#{album.inspect} is not a valid MusicAlbum object."
     end
   end
 end
@@ -118,6 +118,7 @@ end
 
 def create_and_add_music_album(music_albums, genres, params)
   album = MusicAlbum.new(
+    params[:id],
     params[:publish_date],
     params[:title],
     params[:on_spotify]
@@ -153,8 +154,8 @@ def create_and_add_book(books, params)
   book
 end
 
-def generate_unique_id(books)
-  existing_ids = books.map(&:id)
+def generate_unique_id(items)
+  existing_ids = items.map { |item| item.id if item.respond_to?(:id) }.compact
   existing_ids.max.to_i + 1
 end
 
@@ -172,14 +173,17 @@ MUSIC_ALBUMS_JSON_FILE = 'music_albums.json'.freeze
 
 def load_data_from_json(file_path)
   if File.exist?(file_path)
-    JSON.parse(File.read(file_path), symbolize_names: true)
+    data = JSON.parse(File.read(file_path), symbolize_names: true)
+    data.map do |item_data|
+      MusicAlbum.new(item_data[:id], item_data[:publish_date], item_data[:title], item_data[:on_spotify])
+    end
   else
     []
   end
 end
 
 def save_data_to_json(data, file_path)
-  File.write(file_path, JSON.pretty_generate(data))
+  File.write(file_path, JSON.pretty_generate(data.map(&:as_json)))
 end
 
 def save_genres_to_json(genres)
