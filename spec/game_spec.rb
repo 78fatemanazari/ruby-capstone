@@ -1,5 +1,6 @@
 require_relative '../game'
-requuire 'rspec'
+require 'rspec'
+
 RSpec.describe Game do
   describe '#can_be_archived?' do
     it 'returns true if parent method returns true and last_played_at is older than 2 years' do
