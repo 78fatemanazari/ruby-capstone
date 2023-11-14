@@ -5,7 +5,7 @@ require_relative '../music_album'
 
 RSpec.describe Genre do
   let(:genre) { Genre.new(1, 'Pop') }
-  let(:music_album) { MusicAlbum.new(1, Time.new(2020, 1, 1), true) }
+  let(:music_album) { MusicAlbum.new(1, Time.new(2020, 1, 1), 'Some Title', true) }
 
   it "adds an item to the genre's collection" do
     expect(genre.items).to be_empty
