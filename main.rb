@@ -232,7 +232,6 @@ end
 books = []
 labels = []
 
-
 GENRES_JSON_FILE = 'genres.json'.freeze
 BOOKS_JSON_FILE = 'books.json'.freeze
 LABELS_JSON_FILE = 'labels.json'.freeze
@@ -265,7 +264,6 @@ end
 #   end
 # end
 
-
 def save_data_to_json(data, file_path)
   File.write(file_path, JSON.pretty_generate(data.map { |item| item.respond_to?(:as_json) ? item.as_json : item }))
 end
@@ -286,7 +284,6 @@ genres = load_data_from_json(GENRES_JSON_FILE)
 # labels.each do |label|
 #   label.items = books.select { |book| book.label == label }
 # end
-
 
 loop do
   display_menu
