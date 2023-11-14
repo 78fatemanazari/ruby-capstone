@@ -2,7 +2,8 @@ require 'json'
 require_relative 'item'
 require_relative 'book'
 require_relative 'label'
-
+require_relative 'music_album'
+require_relative 'genre'
 def display_menu
   puts 'Menu Options:'
   puts '1. Check if an item can be archived'
@@ -10,7 +11,10 @@ def display_menu
   puts '3. List all books'
   puts '4. List all labels'
   puts '5. Add a book'
-  puts '6. Quit'
+  puts '6. List all music albums'
+  puts '7. Add a music album'
+  puts '8. List all genres' # Added this line
+  puts '9. Quit'
 end
 
 def handle_option_one
@@ -82,6 +86,114 @@ def handle_option_five(books, labels)
   puts "Book added: #{book.title} by #{book.author}"
 end
 
+def handle_option_six(music_albums)
+  puts 'List of all music albums:'
+  music_albums.each do |album|
+    if album.is_a?(MusicAlbum)
+      puts "#{album.title} - #{album.on_spotify ? 'On Spotify' : 'Not on Spotify'}"
+    else
+      puts "#{album.inspect} is not a valid MusicAlbum object."
+    end
+  end
+end
+
+def handle_option_seven(music_albums, genres)
+  album_params = album_params(music_albums)
+  album = create_and_add_music_album(music_albums, genres, album_params)
+
+  if genres.empty?
+    handle_no_genres_option(album, genres)
+  else
+    handle_with_genres_option(album, genres)
+  end
+
+  save_data_to_json(music_albums, MUSIC_ALBUMS_JSON_FILE)
+  save_data_to_json(genres, GENRES_JSON_FILE)
+end
+
+def handle_no_genres_option(album, genres)
+  puts 'No genres available. Would you like to add a new genre? (y/n)'
+  add_new_genre_option = gets.chomp.downcase
+
+  if add_new_genre_option == 'y'
+    new_genre = create_and_add_genre(genres)
+    puts "New genre added: #{new_genre.name}"
+    new_genre.add_item(album)
+    puts "Music album added to genre '#{new_genre.name}'."
+  else
+    puts 'No genre added. Music album not associated with any genre.'
+  end
+end
+
+def handle_with_genres_option(album, genres)
+  print 'Add a genre for this music album (y/n)? '
+  add_genre_option = gets.chomp.downcase
+
+  return unless add_genre_option == 'y'
+
+  handle_genre_selection(album, genres)
+end
+
+def handle_genre_selection(album, genres)
+  display_genres(genres)
+  print 'Enter genre index or press 0 to add a new genre: '
+  genre_index = gets.chomp.to_i - 1
+
+  if genre_index.between?(0, genres.length - 1)
+    selected_genre = genres[genre_index]
+    selected_genre.add_item(album)
+    puts "Music album added to genre '#{selected_genre.name}'."
+  elsif genre_index == -1
+    new_genre = create_and_add_genre(genres)
+    puts "New genre added: #{new_genre.name}"
+    new_genre.add_item(album)
+    puts "Music album added to genre '#{new_genre.name}'."
+  else
+    puts 'Invalid genre index. Genre not added.'
+  end
+end
+
+def create_and_add_genre(genres)
+  print 'Enter genre name: '
+  genre_name = gets.chomp
+
+  new_genre = Genre.new(generate_unique_id(genres), genre_name)
+  genres << new_genre
+  new_genre
+end
+
+def handle_option_eight(genres)
+  Genre.list_all_genres(genres)
+end
+
+def album_params(music_albums)
+  print 'Enter album title: '
+  title = gets.chomp
+  print 'Enter release year: '
+  release_year = gets.chomp.to_i
+  print 'On Spotify? (y/n): '
+  on_spotify_option = gets.chomp.downcase
+
+  {
+    id: generate_unique_id(music_albums),
+    publish_date: Time.new(release_year, 1, 1),
+    title: title,
+    on_spotify: on_spotify_option == 'y'
+  }
+end
+
+def create_and_add_music_album(music_albums, genres, params)
+  album = MusicAlbum.new(
+    params[:id],
+    params[:publish_date],
+    params[:title],
+    params[:on_spotify]
+  )
+  music_albums << album
+  genres.each { |genre| genre.add_item(album) } # Add the album to all genres
+  album
+end
+
 def book_params(books)
   print 'Enter book title: '
   title = gets.chomp
@@ -108,8 +220,8 @@ def create_and_add_book(books, params)
   book
 end
 
-def generate_unique_id(books)
-  existing_ids = books.map(&:id)
+def generate_unique_id(items)
+  existing_ids = items.map { |item| item.id if item.respond_to?(:id) }.compact
   existing_ids.max.to_i + 1
 end
 
@@ -120,28 +232,58 @@ end
 books = []
 labels = []
 
-def save_data_to_json(filename, data)
-  File.open(filename, 'w') do |file|
-    json_data = data.map(&:to_json)
-    JSON.dump(json_data, file)
-  end
-end
+GENRES_JSON_FILE = 'genres.json'.freeze
+BOOKS_JSON_FILE = 'books.json'.freeze
+LABELS_JSON_FILE = 'labels.json'.freeze
+MUSIC_ALBUMS_JSON_FILE = 'music_albums.json'.freeze
 
-def load_data_from_json(filename, data_class)
-  if File.exist?(filename)
-    JSON.parse(File.read(filename)).map { |json| data_class.from_json(json) }
+def load_data_from_json(file_path)
+  if File.exist?(file_path)
+    data = JSON.parse(File.read(file_path), symbolize_names: true)
+    data.map do |item_data|
+      MusicAlbum.new(item_data[:id], item_data[:publish_date], item_data[:title], item_data[:on_spotify])
+    end
   else
     []
   end
 end
 
-labels = load_data_from_json('labels.json', Label)
-books = load_data_from_json('books.json', Book)
+# def save_data_to_json(filename, data)
+#   File.open(filename, 'w') do |file|
+#     json_data = data.map(&:to_json)
+#     JSON.dump(json_data, file)
+#   end
+# end
 
-# Link labels with items
-labels.each do |label|
-  label.items = books.select { |book| book.label == label }
+# def load_data_from_json(filename, data_class)
+#   if File.exist?(filename)
+#     JSON.parse(File.read(filename)).map { |json| data_class.from_json(json) }
+
+#   else
+#     []
+#   end
+# end
+
+def save_data_to_json(data, file_path)
+  File.write(file_path, JSON.pretty_generate(data.map { |item| item.respond_to?(:as_json) ? item.as_json : item }))
 end
+
+def save_genres_to_json(genres)
+  save_data_to_json(genres, GENRES_JSON_FILE)
+end
+
+books = load_data_from_json(BOOKS_JSON_FILE)
+labels = load_data_from_json(LABELS_JSON_FILE)
+music_albums = load_data_from_json(MUSIC_ALBUMS_JSON_FILE)
+genres = load_data_from_json(GENRES_JSON_FILE)
+
+# labels = load_data_from_json('labels.json', Label)
+# books = load_data_from_json('books.json', Book)
+
+# # Link labels with items
+# labels.each do |label|
+#   label.items = books.select { |book| book.label == label }
+# end
 
 loop do
   display_menu
@@ -160,8 +302,19 @@ loop do
   when 5
     handle_option_five(books, labels)
   when 6
-    save_data_to_json('books.json', books)
-    save_data_to_json('labels.json', labels)
+    handle_option_six(music_albums)
+  when 7
+    handle_option_seven(music_albums, genres)
+  when 8
+    handle_option_eight(genres)
+  when 9
+    save_data_to_json(books, BOOKS_JSON_FILE)
+    save_data_to_json(labels, LABELS_JSON_FILE)
+    save_data_to_json(music_albums, MUSIC_ALBUMS_JSON_FILE)
+    save_data_to_json(genres, GENRES_JSON_FILE)
+    #     save_data_to_json('books.json', books)
+    #     save_data_to_json('labels.json', labels)
+
     puts 'Data saved. Goodbye!'
     break
   else
