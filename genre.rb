@@ -20,4 +20,12 @@ class Genre
       puts genre.name
     end
   end
+
+  def as_json(options = {})
+    {
+      id: @id,
+      name: @name,
+      items: @items.map { |item| item.as_json(options) }
+    }
+  end
 end

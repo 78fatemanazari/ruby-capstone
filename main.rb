@@ -100,9 +100,56 @@ end
 def handle_option_seven(music_albums, genres)
   album_params = album_params(music_albums)
   album = create_and_add_music_album(music_albums, genres, album_params)
+
+  if genres.empty?
+    puts 'No genres available. Would you like to add a new genre? (y/n)'
+    add_new_genre_option = gets.chomp.downcase
+
+    if add_new_genre_option == 'y'
+      new_genre = create_and_add_genre(genres)
+      puts "New genre added: #{new_genre.name}"
+      new_genre.add_item(album)
+      puts "Music album added to genre '#{new_genre.name}'."
+    else
+      puts 'No genre added. Music album not associated with any genre.'
+    end
+  else
+    print 'Add a genre for this music album (y/n)? '
+    add_genre_option = gets.chomp.downcase
+
+    if add_genre_option == 'y'
+      display_genres(genres)
+      print 'Enter genre index or press 0 to add a new genre: '
+      genre_index = gets.chomp.to_i - 1
+
+      if genre_index.between?(0, genres.length - 1)
+        selected_genre = genres[genre_index]
+        selected_genre.add_item(album)
+        puts "Music album added to genre '#{selected_genre.name}'."
+      elsif genre_index == -1
+        new_genre = create_and_add_genre(genres)
+        puts "New genre added: #{new_genre.name}"
+        new_genre.add_item(album)
+        puts "Music album added to genre '#{new_genre.name}'."
+      else
+        puts 'Invalid genre index. Genre not added.'
+      end
+    end
+  end
+
   puts "Music album added: #{album.title} - #{album.on_spotify ? 'On Spotify' : 'Not on Spotify'}"
 
   save_data_to_json(music_albums, MUSIC_ALBUMS_JSON_FILE)
+  save_data_to_json(genres, GENRES_JSON_FILE)
+end
+
+def create_and_add_genre(genres)
+  print 'Enter genre name: '
+  genre_name = gets.chomp
+
+  new_genre = Genre.new(generate_unique_id(genres), genre_name)
+  genres << new_genre
+  new_genre
 end
 
 def handle_option_eight(genres)
@@ -187,13 +234,17 @@ def load_data_from_json(file_path)
     data.map do |item_data|
       MusicAlbum.new(item_data[:id], item_data[:publish_date], item_data[:title], item_data[:on_spotify])
     end
-
-def save_data_to_json(filename, data)
-  File.open(filename, 'w') do |file|
-    json_data = data.map(&:to_json)
-    JSON.dump(json_data, file)
+  else
+    []
   end
 end
+
+# def save_data_to_json(filename, data)
+#   File.open(filename, 'w') do |file|
+#     json_data = data.map(&:to_json)
+#     JSON.dump(json_data, file)
+#   end
+# end
 
 # def load_data_from_json(filename, data_class)
 #   if File.exist?(filename)
@@ -206,7 +257,7 @@ end
 
 
 def save_data_to_json(data, file_path)
-  File.write(file_path, JSON.pretty_generate(data.map(&:as_json)))
+  File.write(file_path, JSON.pretty_generate(data.map { |item| item.respond_to?(:as_json) ? item.as_json : item }))
 end
 
 def save_genres_to_json(genres)
@@ -254,8 +305,8 @@ loop do
     save_data_to_json(labels, LABELS_JSON_FILE)
     save_data_to_json(music_albums, MUSIC_ALBUMS_JSON_FILE)
     save_data_to_json(genres, GENRES_JSON_FILE)
-#     save_data_to_json('books.json', books)
-#     save_data_to_json('labels.json', labels)
+    #     save_data_to_json('books.json', books)
+    #     save_data_to_json('labels.json', labels)
 
     puts 'Data saved. Goodbye!'
     break
