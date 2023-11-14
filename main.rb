@@ -102,45 +102,55 @@ def handle_option_seven(music_albums, genres)
   album = create_and_add_music_album(music_albums, genres, album_params)
 
   if genres.empty?
-    puts 'No genres available. Would you like to add a new genre? (y/n)'
-    add_new_genre_option = gets.chomp.downcase
-
-    if add_new_genre_option == 'y'
-      new_genre = create_and_add_genre(genres)
-      puts "New genre added: #{new_genre.name}"
-      new_genre.add_item(album)
-      puts "Music album added to genre '#{new_genre.name}'."
-    else
-      puts 'No genre added. Music album not associated with any genre.'
-    end
+    handle_no_genres_option(album, genres)
   else
-    print 'Add a genre for this music album (y/n)? '
-    add_genre_option = gets.chomp.downcase
-
-    if add_genre_option == 'y'
-      display_genres(genres)
-      print 'Enter genre index or press 0 to add a new genre: '
-      genre_index = gets.chomp.to_i - 1
-
-      if genre_index.between?(0, genres.length - 1)
-        selected_genre = genres[genre_index]
-        selected_genre.add_item(album)
-        puts "Music album added to genre '#{selected_genre.name}'."
-      elsif genre_index == -1
-        new_genre = create_and_add_genre(genres)
-        puts "New genre added: #{new_genre.name}"
-        new_genre.add_item(album)
-        puts "Music album added to genre '#{new_genre.name}'."
-      else
-        puts 'Invalid genre index. Genre not added.'
-      end
-    end
+    handle_with_genres_option(album, genres)
   end
-
-  puts "Music album added: #{album.title} - #{album.on_spotify ? 'On Spotify' : 'Not on Spotify'}"
 
   save_data_to_json(music_albums, MUSIC_ALBUMS_JSON_FILE)
   save_data_to_json(genres, GENRES_JSON_FILE)
+end
+
+def handle_no_genres_option(album, genres)
+  puts 'No genres available. Would you like to add a new genre? (y/n)'
+  add_new_genre_option = gets.chomp.downcase
+
+  if add_new_genre_option == 'y'
+    new_genre = create_and_add_genre(genres)
+    puts "New genre added: #{new_genre.name}"
+    new_genre.add_item(album)
+    puts "Music album added to genre '#{new_genre.name}'."
+  else
+    puts 'No genre added. Music album not associated with any genre.'
+  end
+end
+
+def handle_with_genres_option(album, genres)
+  print 'Add a genre for this music album (y/n)? '
+  add_genre_option = gets.chomp.downcase
+
+  return unless add_genre_option == 'y'
+
+  handle_genre_selection(album, genres)
+end
+
+def handle_genre_selection(album, genres)
+  display_genres(genres)
+  print 'Enter genre index or press 0 to add a new genre: '
+  genre_index = gets.chomp.to_i - 1
+
+  if genre_index.between?(0, genres.length - 1)
+    selected_genre = genres[genre_index]
+    selected_genre.add_item(album)
+    puts "Music album added to genre '#{selected_genre.name}'."
+  elsif genre_index == -1
+    new_genre = create_and_add_genre(genres)
+    puts "New genre added: #{new_genre.name}"
+    new_genre.add_item(album)
+    puts "Music album added to genre '#{new_genre.name}'."
+  else
+    puts 'Invalid genre index. Genre not added.'
+  end
 end
 
 def create_and_add_genre(genres)
