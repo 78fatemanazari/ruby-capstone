@@ -1,6 +1,7 @@
 require_relative '../book'
+require 'rspec'
 
-describe Book do
+RSpec.describe Book do
   let(:book_params) do
     {
       id: 1,
